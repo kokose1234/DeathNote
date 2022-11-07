@@ -1,0 +1,112 @@
+﻿<reactiveui:ReactiveWindow x:Class="DeathNote.MainWindow"
+                           x:TypeArguments="local:MainViewModel"
+                           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                           xmlns:reactiveui="http://reactiveui.net"
+                           xmlns:local="clr-namespace:DeathNote"
+                           mc:Ignorable="d"
+                           Title="DeathNote" Height="414" Width="265" ResizeMode="NoResize" 
+                           Topmost="True" Icon="icon.ico"
+                           WindowStartupLocation="CenterScreen" Background="#333333">
+    <Window.Resources>
+        <Style x:Key="FocusVisual1">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Rectangle Margin="2" StrokeDashArray="1 2" SnapsToDevicePixels="true" StrokeThickness="1"
+                       Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <SolidColorBrush x:Key="Button.Static.Background" Color="#FFDDDDDD"/>
+        <SolidColorBrush x:Key="Button.Static.Border" Color="#FF707070"/>
+        <SolidColorBrush x:Key="Button.MouseOver.Background" Color="Gray"/>
+        <SolidColorBrush x:Key="Button.MouseOver.Border" Color="Gray"/>
+        <SolidColorBrush x:Key="Button.Pressed.Background" Color="Gray"/>
+        <SolidColorBrush x:Key="Button.Pressed.Border" Color="Gray"/>
+        <SolidColorBrush x:Key="Button.Disabled.Background" Color="#FFF4F4F4"/>
+        <SolidColorBrush x:Key="Button.Disabled.Border" Color="#FFADB2B5"/>
+        <SolidColorBrush x:Key="Button.Disabled.Foreground" Color="#FF838383"/>
+        <Style x:Key="ButtonStyle1" TargetType="{x:Type Button}">
+            <Setter Property="FrameworkElement.FocusVisualStyle" Value="{StaticResource FocusVisual1}"/>
+            <Setter Property="Control.Background" Value="{StaticResource Button.Static.Background}"/>
+            <Setter Property="Control.BorderBrush" Value="{StaticResource Button.Static.Border}"/>
+            <Setter Property="Control.Foreground"
+              Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="Control.BorderThickness" Value="1"/>
+            <Setter Property="Control.HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Control.VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Control.Padding" Value="1"/>
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="border" Background="{TemplateBinding Control.Background}"
+                    BorderThickness="{TemplateBinding Control.BorderThickness}"
+                    BorderBrush="{TemplateBinding Control.BorderBrush}" SnapsToDevicePixels="true">
+                            <ContentPresenter x:Name="contentPresenter" Focusable="False"
+                                HorizontalAlignment="{TemplateBinding Control.HorizontalContentAlignment}"
+                                Margin="{TemplateBinding Control.Padding}" RecognizesAccessKey="True"
+                                SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"
+                                VerticalAlignment="{TemplateBinding Control.VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Button.IsDefaulted" Value="true">
+                                <Setter TargetName="border" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"
+                        Property="Border.BorderBrush"/>
+                            </Trigger>
+                            <Trigger Property="UIElement.IsMouseOver" Value="true">
+                                <Setter TargetName="border" Value="{StaticResource Button.MouseOver.Background}"
+                        Property="Border.Background"/>
+                                <Setter TargetName="border" Value="{StaticResource Button.MouseOver.Border}" Property="Border.BorderBrush"/>
+                            </Trigger>
+                            <Trigger Property="ButtonBase.IsPressed" Value="true">
+                                <Setter TargetName="border" Value="{StaticResource Button.Pressed.Background}" Property="Border.Background"/>
+                                <Setter TargetName="border" Value="{StaticResource Button.Pressed.Border}" Property="Border.BorderBrush"/>
+                            </Trigger>
+                            <Trigger Property="UIElement.IsEnabled" Value="false">
+                                <Setter TargetName="border" Value="{StaticResource Button.Disabled.Background}"
+                        Property="Border.Background"/>
+                                <Setter TargetName="border" Value="{StaticResource Button.Disabled.Border}" Property="Border.BorderBrush"/>
+                                <Setter TargetName="contentPresenter" Value="{StaticResource Button.Disabled.Foreground}"
+                        Property="TextElement.Foreground"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid Row="0" Margin="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="40"/>
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="TextBox" Grid.Column="0" TextWrapping="NoWrap" AcceptsReturn="False"
+                     FontFamily="NanumGothic" Margin="0,0,5,0" Background="DimGray" Foreground="White"
+                     BorderBrush="{x:Null}"/>
+            <Button Grid.Column="1" Content="추가" Background="DimGray" Foreground="AliceBlue" Opacity="0.7"
+                    Style="{StaticResource ButtonStyle1}" FontFamily="NanumGothic" BorderBrush="{x:Null}"/>
+        </Grid>
+        <ListBox x:Name="Keywords" Grid.Row="1" Background="Transparent" BorderBrush="{x:Null}"
+                 ItemsSource="{Binding KeywordList}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock FontFamily="NanumGothic" FontWeight="Bold" Foreground="White" Text="{Binding}"/>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+            <FrameworkElement.ContextMenu>
+                <ContextMenu>
+                    <MenuItem x:Name="RemoveButton" Header="삭제"/>
+                </ContextMenu>
+            </FrameworkElement.ContextMenu>
+        </ListBox>
+    </Grid>
+</reactiveui:ReactiveWindow>
