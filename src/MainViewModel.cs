@@ -23,6 +23,9 @@ public class MainViewModel : ReactiveObject
     [Reactive]
     public string Text { get; set; }
 
+    private ReaderWriterLockSlim _readerWriterLock = new();
+
+
     public MainViewModel()
     {
         if (File.Exists("./Keywords.json"))
@@ -30,7 +33,17 @@ public class MainViewModel : ReactiveObject
 
         RemoveCommand = ReactiveCommand.Create(() =>
         {
-            KeywordList.Remove(SelectedItem);
+            _readerWriterLock.EnterWriteLock();
+
+            try
+            {
+                KeywordList.Remove(SelectedItem);
+            }
+            finally
+            {
+                _readerWriterLock.ExitWriteLock();
+            }
+
             SaveKeywords();
         });
 
@@ -46,25 +59,63 @@ public class MainViewModel : ReactiveObject
         if (string.IsNullOrEmpty(Text) || string.IsNullOrWhiteSpace(Text) || KeywordList.Any(x => x == Text.ToLower()))
             return;
 
-        KeywordList.Add(Text.ToLower());
+        _readerWriterLock.EnterWriteLock();
+
+        try
+        {
+            KeywordList.Add(Text.ToLower());
+        }
+        finally
+        {
+            _readerWriterLock.ExitWriteLock();
+        }
+
         SaveKeywords();
     }
 
-    private void SaveKeywords() => File.WriteAllText("./Keywords.json", JsonConvert.SerializeObject(KeywordList.ToArray(), Formatting.Indented));
+    private void SaveKeywords()
+    {
+        _readerWriterLock.EnterReadLock();
+
+        try
+        {
+            File.WriteAllText("./Keywords.json", JsonConvert.SerializeObject(KeywordList.ToArray(), Formatting.Indented));
+        }
+        finally
+        {
+            _readerWriterLock.ExitReadLock();
+        }
+    }
 
     private void ProcessKillJob()
     {
         while (true)
         {
-            if (KeywordList.Count > 0)
-            {
-                foreach (var process in Process.GetProcesses())
-                {
-                    var name = process.ProcessName.ToLower();
+            _readerWriterLock.EnterReadLock();
 
-                    if (KeywordList.Any(x => name.Contains(x)) && !process.CloseMainWindow())
-                        process.Kill(true);
+            try
+            {
+                if (KeywordList.Count > 0)
+                {
+                    foreach (var process in Process.GetProcesses())
+                    {
+                        var name = process.ProcessName.ToLower();
+
+                        // if (KeywordList.Any(x => name.Contains(x)) && !process.CloseMainWindow())
+                        // {
+                        //     process.Kill(true);
+                        // }
+
+                        if (KeywordList.Any(x => name.Contains(x)))
+                        {
+                            WinApi.SuspendProcess(process.Id);
+                        }
+                    }
                 }
+            }
+            finally
+            {
+                _readerWriterLock.ExitReadLock();
             }
 
             Thread.Sleep(1000);

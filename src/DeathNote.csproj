@@ -8,6 +8,9 @@
     <BaseOutputPath>../Output/</BaseOutputPath>
      <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
      <ApplicationIcon>icon.ico</ApplicationIcon>
+     <ApplicationManifest>app.manifest</ApplicationManifest>
+     <SignAssembly>False</SignAssembly>
+     <DelaySign>False</DelaySign>
   </PropertyGroup>
 
   <ItemGroup>
